@@ -1,0 +1,28 @@
+name: Import enlarged captions video (one-time)
+on:
+  push:
+    paths:
+      - '.github/workflows/import-video-large-captions-20261117.yml'
+permissions:
+  contents: write
+jobs:
+  import-video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify enlarged-captions video
+        env:
+          VIDEO_URL: "https://70ac2b99-b7ed-4aba-8e46-2ac804414a6d.sandbox.floot.app/_cdn/static/5b7d3a61-bf1d-41ea-b4da-6c8cc757ba7c-veydrix_subtitles_large_20261117.mp4"
+        run: |
+          set -euo pipefail
+          mkdir -p video
+          curl --fail --location --retry 3 --silent --show-error "$VIDEO_URL" --output "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          echo "9e8f52ccd89d538dac6717debb444ba56c834044d706ac9007e5579d836b4d3c  video/KakaoTalk_20261117_131448007_subtitles_large.mp4" | sha256sum -c -
+      - name: Commit to video library
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add enlarged captions version of event video"
+          git push
