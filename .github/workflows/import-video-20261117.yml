@@ -1,0 +1,28 @@
+name: Import original video (one-time)
+on:
+  push:
+    paths:
+      - '.github/workflows/import-video-20261117.yml'
+permissions:
+  contents: write
+jobs:
+  import-video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify original video
+        env:
+          VIDEO_URL: "https://70ac2b99-b7ed-4aba-8e46-2ac804414a6d.sandbox.floot.app/_cdn/static/0c060a3c-4de2-4865-8759-ddb1122d136a-veydrix_temp_video_20261117.mp4"
+        run: |
+          set -euo pipefail
+          mkdir -p video
+          curl --fail --location --retry 3 --silent --show-error "$VIDEO_URL" --output "video/KakaoTalk_20261117_131448007.mp4"
+          echo "7c7b06c2e26a035460e63bebadc098919e85b00291d7ca11fbb63e0359e44275  video/KakaoTalk_20261117_131448007.mp4" | sha256sum -c -
+      - name: Commit original video to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "video/KakaoTalk_20261117_131448007.mp4"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add original video from 2026-11-17"
+          git push
