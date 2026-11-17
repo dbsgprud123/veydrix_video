@@ -1,0 +1,27 @@
+name: Replace broken subtitles enlargement with corrected video
+on:
+  push:
+    paths:
+      - '.github/workflows/replace-enlarged-captions-20261117.yml'
+permissions:
+  contents: write
+jobs:
+  replace-video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download corrected video and verify checksum
+        env:
+          VIDEO_URL: "https://70ac2b99-b7ed-4aba-8e46-2ac804414a6d.sandbox.floot.app/_cdn/static/2b9a15e4-2b06-4f42-b669-d74877006356-veydrix_caption_fix_20261117.mp4"
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error "$VIDEO_URL" --output "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          echo "aa84cfb8773d7cc708c5812ffa33fe16135d27db1e62f65d5f8dac49e5f758a9  video/KakaoTalk_20261117_131448007_subtitles_large.mp4" | sha256sum -c -
+      - name: Commit corrected video
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Fix enlarged captions without zooming or clipping"
+          git push
