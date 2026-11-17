@@ -1,0 +1,27 @@
+name: Replace video with synchronized captions (one-time)
+on:
+  push:
+    paths:
+      - '.github/workflows/replace-synced-captions-20261117.yml'
+permissions:
+  contents: write
+jobs:
+  replace-video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify fully synchronized subtitles version
+        env:
+          VIDEO_URL: "https://70ac2b99-b7ed-4aba-8e46-2ac804414a6d.sandbox.floot.app/_cdn/static/10489354-24ee-4cf6-b08d-52ec67b0067d-veydrix_subtitles_synced_final_20261117.mp4"
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error "$VIDEO_URL" --output "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          echo "5a674a5d326aeb99a2954e6b2d8e9ec2fa32e9eddcbfbf16a2254d32472b26f8  video/KakaoTalk_20261117_131448007_subtitles_large.mp4" | sha256sum -c -
+      - name: Commit synchronized video
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "video/KakaoTalk_20261117_131448007_subtitles_large.mp4"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Fix subtitle overlap and preserve original video framing"
+          git push
